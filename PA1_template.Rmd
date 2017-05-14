@@ -10,10 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ###Reproducible Research Peer-graded Assignment: Course Project 1 (week 2) 
 
-```
-setwd("d:\\coursera")
-```
-
 ### Loading and preprocessing the data
 1.Load the data (i.e. read.csv())
 ```
@@ -32,6 +28,16 @@ head(totalnosteps,10)
 ```
 2.Make a histogram of the total number of steps taken each day
 ```
+hist(as.numeric(totalnosteps$steps),
+                  breaks = 10,
+                  col = "blue",
+                  xlab = "No. of Steps Taken",
+                  main="Histogram of the Total Number of Steps Taken Each Day")
+```
+```{r, echo=FALSE}
+setwd("d:\\coursera")
+mainsource <- read.csv("./activity.csv", sep = ",", header = TRUE, na.strings = "NA")
+mainsource$date<-as.Date(mainsource$date,"%Y-%m-%d")
 totalnosteps <- aggregate(mainsource$steps, list(mainsource$date),sum)
 colnames(totalnosteps) <- c("date","steps")
 hist(as.numeric(totalnosteps$steps),
@@ -40,12 +46,17 @@ hist(as.numeric(totalnosteps$steps),
                   xlab = "No. of Steps Taken",
                   main="Histogram of the Total Number of Steps Taken Each Day")
 ```
+
 3.Calculate and report the mean and median of the total number of steps taken per day
 ```
 Meantotalnosteps <- mean(totalnosteps$steps, na.rm = TRUE)
-Meantotalnosteps
+```{r}
+mean(totalnosteps$steps, na.rm = TRUE)
+```
+```
 Mediantotalnosteps <- median(totalnosteps$steps, na.rm = TRUE)
-Mediantotalnosteps
+```{r}
+median(totalnosteps$steps, na.rm = TRUE)
 ```
 
 ###What is the average daily activity pattern?
@@ -59,21 +70,30 @@ plot(stepsinterval$interval, stepsinterval$steps,
                   ylab = "Number of Steps",
                   main = "Average Number of Steps Taken")
 ```
+```{r, echo = FALSE}
+stepsinterval <- aggregate(steps ~ interval, data = mainsource, mean)
+plot(stepsinterval$interval, stepsinterval$steps, 
+                  col = "blue", 
+                  type = "l", 
+                  xlab = "5 Minute Interval", 
+                  ylab = "Number of Steps",
+                  main = "Average Number of Steps Taken")
+```
+
 2.Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 ```
 maxsteps <- stepsinterval[which.max(stepsinterval$steps), ]
-maxsteps
+```{r}
+stepsinterval[which.max(stepsinterval$steps), ]
 ```
 It is observed that the maximum number of steps is 206 which occurs at interval 835.
 
 ###Imputing missing values
 1.Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
-```
-totalnomissteps <- sum(is.na(mainsource$steps))
-totalnomissteps
-totalnomissdate <- sum(is.na(mainsource$date))
-totalnomissdate
-totalnomissinterval <- sum(is.na(mainsource$interval))
+```{r}
+sum(is.na(mainsource$steps))
+sum(is.na(mainsource$date))
+sum(is.na(mainsource$interval))
 ```
 Total number of missing values in the dataset is 2304.
 
@@ -87,8 +107,15 @@ fillNA[missingvalue, ]$steps<-unlist(lapply(missingvalue, FUN=function(missingva
 ```
 3.Creating a new dataset that is equal to the original dataset but with the missing data filled in.
 ```
-newdataset <- fillNA
-newdataset
+str(fillNA)
+```
+```{r, echo = FALSE}
+missingvalue <- which(is.na(mainsource$steps))
+fillNA <- mainsource
+fillNA[missingvalue, ]$steps<-unlist(lapply(missingvalue, FUN=function(missingvalue){
+                stepsinterval[mainsource[missingvalue,]$interval==stepsinterval$interval,]$steps
+                }))
+str(fillNA)
 ```
 4.Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.
 
@@ -100,12 +127,27 @@ hist(as.numeric(totalnostepsfillNA$steps),
                   xlab = "No. of Steps Taken",
                   main="Histogram of the Total Number of Steps Taken Each Day")
                   
-MeantotalnostepsfillNA <- mean(totalnostepsfillNA$steps, na.rm = TRUE)
-MeantotalnostepsfillNA
-MediantotalnostepsfillNA <- median(totalnostepsfillNA$steps, na.rm = TRUE)
-MediantotalnostepsfillNA
+```
+```{r, echo = FALSE }
+missingvalue <- which(is.na(mainsource$steps))
+fillNA <- mainsource
+fillNA[missingvalue, ]$steps<-unlist(lapply(missingvalue, FUN=function(missingvalue){
+                stepsinterval[mainsource[missingvalue,]$interval==stepsinterval$interval,]$steps
+                }))
+totalnostepsfillNA <- aggregate(steps ~ date, data = fillNA, sum)
+hist(as.numeric(totalnostepsfillNA$steps),
+                  breaks = 20,
+                  col = "blue",
+                  xlab = "No. of Steps Taken",
+                  main="Histogram of the Total Number of Steps Taken Each Day")
+                  
+```
+```{r}
+mean(totalnostepsfillNA$steps, na.rm = TRUE)
+median(totalnostepsfillNA$steps, na.rm = TRUE)
 ```
 Do these values differ from the estimates from the first part of the assignment? Yes, the values differ from the first part because for this part, the mean and median are both equal at 10766.19
+
 What is the impact of imputing missing data on the estimates of the total daily number of steps? The impact of imputting missing data changes the median.
 
 ###Are there differences in activity patterns between weekdays and weekends?
@@ -119,12 +161,12 @@ head(fillNA)
 
 ```
 #the average number of steps taken for weekdays 
-weekdaysfillNA <- fillNA[fillNA$week == "weekday",]
+weekdaysfillNA <- fillNA[fillNA$indicator == weekday",]
 stepsperweekday <- aggregate(weekdaysfillNA$steps, list(weekdaysfillNA$interval), FUN=mean)
 stepsperweekday$indicator <- "weekday"
 
 #the average number of steps taken for weekends
-weekendfillNA <- fillNA[fillNA$week == "weekend",]
+weekendfillNA <- fillNA[fillNA$indicator == "weekend",]
 stepsperweekend <- aggregate(weekendfillNA$steps, list(weekendfillNA$interval), FUN=mean)
 stepsperweekend$indicator <- "weekend"
 
@@ -134,4 +176,23 @@ colnames(newfillNA) <- c("interval","steps","indicator")
 library(lattice)
 xyplot(steps ~ interval  | indicator, data = newfillNA, layout = c(1,2), type ="l", ylab="Number of Steps")
 ```
-Yes, there are differences in activity patterns between weekdays and weekends. As observed, weekend at most times exceeded the 100 steps mark but never reached the 200 steps mark. While weekday reached the 200 steps mark, it remains below the 100 steps mark. 
+```{r, echo = FALSE }
+fillNA$day<-as.factor(weekdays(fillNA$date))
+fillNA$indicator<-ifelse(fillNA$day %in% c("Saturday","Sunday"), "weekend", "weekday")
+
+weekdaysfillNA <- fillNA[fillNA$indicator == "weekday",]
+stepsperweekday <- aggregate(weekdaysfillNA$steps, list(weekdaysfillNA$interval), FUN=mean)
+stepsperweekday$indicator <- "weekday"
+
+weekendfillNA <- fillNA[fillNA$indicator == "weekend",]
+stepsperweekend <- aggregate(weekendfillNA$steps, list(weekendfillNA$interval), FUN=mean)
+stepsperweekend$indicator <- "weekend"
+
+newfillNA <- rbind(stepsperweekday,stepsperweekend)
+newfillNA$indicator <- as.factor(newfillNA$indicator)
+colnames(newfillNA) <- c("interval","steps","indicator")
+library(lattice)
+xyplot(steps ~ interval  | indicator, data = newfillNA, layout = c(1,2), type ="l", ylab="Number of Steps")
+```
+
+Yes, there are differences in activity patterns between weekdays and weekends. As observed, weekend at most times exceeded the 100 steps mark but never reached the 200 steps mark. Weekday was able to reach the 200 steps mark at some point, but it remains below the 100 steps mark throughout the duration of the interval. 
