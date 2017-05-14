@@ -29,14 +29,15 @@ your analysis
 ![](PA1_template_files/figure-markdown_strict/unnamed-chunk-1-1.png)
 
 3.Calculate and report the mean and median of the total number of steps
-taken per day \`\`\` Meantotalnosteps &lt;- mean(totalnosteps$steps,
-na.rm = TRUE)
+taken per day
+
+    Meantotalnosteps <- mean(totalnosteps$steps, na.rm = TRUE)
 
     mean(totalnosteps$steps, na.rm = TRUE)
 
     ## [1] 10766.19
 
-\`\`\` Mediantotalnosteps &lt;- median(totalnosteps$steps, na.rm = TRUE)
+    Mediantotalnosteps <- median(totalnosteps$steps, na.rm = TRUE)
 
     median(totalnosteps$steps, na.rm = TRUE)
 
@@ -59,8 +60,7 @@ na.rm = TRUE)
 ![](PA1_template_files/figure-markdown_strict/unnamed-chunk-4-1.png)
 
 2.Which 5-minute interval, on average across all the days in the
-dataset, contains the maximum number of steps? \`\`\` maxsteps &lt;-
-stepsinterval\[which.max(stepsinterval$steps), \]
+dataset, contains the maximum number of steps?
 
     stepsinterval[which.max(stepsinterval$steps), ]
 
