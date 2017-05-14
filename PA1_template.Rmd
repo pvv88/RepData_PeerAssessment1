@@ -19,8 +19,7 @@ mainsource <- read.csv("./activity.csv", sep = ",", header = TRUE, na.strings = 
 ```
 mainsource$date<-as.Date(mainsource$date,"%Y-%m-%d")
 ```
-
-###What is mean total number of steps taken per day?
+### What is mean total number of steps taken per day?
 1.Calculate the total number of steps taken per day
 ```
 totalnosteps <-aggregate(mainsource$steps, list(mainsource$date), sum, na.rm = TRUE)
@@ -34,7 +33,7 @@ hist(as.numeric(totalnosteps$steps),
                   xlab = "No. of Steps Taken",
                   main="Histogram of the Total Number of Steps Taken Each Day")
 ```
-```{r, echo=FALSE}
+```{r, echo = FALSE}
 setwd("d:\\coursera")
 mainsource <- read.csv("./activity.csv", sep = ",", header = TRUE, na.strings = "NA")
 mainsource$date<-as.Date(mainsource$date,"%Y-%m-%d")
@@ -50,16 +49,18 @@ hist(as.numeric(totalnosteps$steps),
 3.Calculate and report the mean and median of the total number of steps taken per day
 ```
 Meantotalnosteps <- mean(totalnosteps$steps, na.rm = TRUE)
+```
 ```{r}
 mean(totalnosteps$steps, na.rm = TRUE)
 ```
 ```
 Mediantotalnosteps <- median(totalnosteps$steps, na.rm = TRUE)
+```
 ```{r}
 median(totalnosteps$steps, na.rm = TRUE)
 ```
 
-###What is the average daily activity pattern?
+### What is the average daily activity pattern?
 1.Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 ```
 stepsinterval <- aggregate(steps ~ interval, data = mainsource, mean)
@@ -81,14 +82,12 @@ plot(stepsinterval$interval, stepsinterval$steps,
 ```
 
 2.Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```
-maxsteps <- stepsinterval[which.max(stepsinterval$steps), ]
 ```{r}
 stepsinterval[which.max(stepsinterval$steps), ]
 ```
 It is observed that the maximum number of steps is 206 which occurs at interval 835.
 
-###Imputing missing values
+### Imputing missing values
 1.Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 ```{r}
 sum(is.na(mainsource$steps))
@@ -150,7 +149,7 @@ Do these values differ from the estimates from the first part of the assignment?
 
 What is the impact of imputing missing data on the estimates of the total daily number of steps? The impact of imputting missing data changes the median.
 
-###Are there differences in activity patterns between weekdays and weekends?
+### Are there differences in activity patterns between weekdays and weekends?
 1.Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 ```
 fillNA$day<-as.factor(weekdays(fillNA$date))
