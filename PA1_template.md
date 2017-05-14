@@ -20,8 +20,13 @@ your analysis
 
 2.Make a histogram of the total number of steps taken each day
 
+    setwd("d:\\coursera")
+    mainsource <- read.csv("./activity.csv", sep = ",", header = TRUE, na.strings = "NA")
+    mainsource$date<-as.Date(mainsource$date,"%Y-%m-%d")
+    totalnosteps <- aggregate(mainsource$steps, list(mainsource$date),sum)
+    colnames(totalnosteps) <- c("date","steps")
     hist(as.numeric(totalnosteps$steps),
-                      breaks = 10,
+                      breaks = 20,
                       col = "blue",
                       xlab = "No. of Steps Taken",
                       main="Histogram of the Total Number of Steps Taken Each Day")
@@ -31,13 +36,9 @@ your analysis
 3.Calculate and report the mean and median of the total number of steps
 taken per day
 
-    Meantotalnosteps <- mean(totalnosteps$steps, na.rm = TRUE)
-
     mean(totalnosteps$steps, na.rm = TRUE)
 
     ## [1] 10766.19
-
-    Mediantotalnosteps <- median(totalnosteps$steps, na.rm = TRUE)
 
     median(totalnosteps$steps, na.rm = TRUE)
 
@@ -57,12 +58,13 @@ taken per day
                       ylab = "Number of Steps",
                       main = "Average Number of Steps Taken")
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-4-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-3-1.png)
 
 2.Which 5-minute interval, on average across all the days in the
 dataset, contains the maximum number of steps?
 
-    stepsinterval[which.max(stepsinterval$steps), ]
+    maxsteps <- stepsinterval[which.max(stepsinterval$steps), ]
+    maxsteps
 
     ##     interval    steps
     ## 104      835 206.1698
@@ -103,6 +105,11 @@ you could use the mean/median for that day, or the mean for that
 3.Creating a new dataset that is equal to the original dataset but with
 the missing data filled in.
 
+    missingvalue <- which(is.na(mainsource$steps))
+    fillNA <- mainsource
+    fillNA[missingvalue, ]$steps<-unlist(lapply(missingvalue, FUN=function(missingvalue){
+                    stepsinterval[mainsource[missingvalue,]$interval==stepsinterval$interval,]$steps
+                    }))
     str(fillNA)
 
     ## 'data.frame':    17568 obs. of  3 variables:
@@ -114,15 +121,19 @@ the missing data filled in.
 Calculate and report the mean and median total number of steps taken per
 day.
 
+    missingvalue <- which(is.na(mainsource$steps))
+    fillNA <- mainsource
+    fillNA[missingvalue, ]$steps<-unlist(lapply(missingvalue, FUN=function(missingvalue){
+                    stepsinterval[mainsource[missingvalue,]$interval==stepsinterval$interval,]$steps
+                    }))
     totalnostepsfillNA <- aggregate(steps ~ date, data = fillNA, sum)
     hist(as.numeric(totalnostepsfillNA$steps),
                       breaks = 20,
                       col = "blue",
                       xlab = "No. of Steps Taken",
                       main="Histogram of the Total Number of Steps Taken Each Day")
-                      
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-7-1.png)
 
     mean(totalnostepsfillNA$steps, na.rm = TRUE)
 
@@ -150,14 +161,25 @@ weekend day.
     fillNA$indicator<-ifelse(fillNA$day %in% c("Saturday","Sunday"), "weekend", "weekday")
     head(fillNA)
 
+    ##       steps       date interval    day indicator
+    ## 1 1.7169811 2012-10-01        0 Monday   weekday
+    ## 2 0.3396226 2012-10-01        5 Monday   weekday
+    ## 3 0.1320755 2012-10-01       10 Monday   weekday
+    ## 4 0.1509434 2012-10-01       15 Monday   weekday
+    ## 5 0.0754717 2012-10-01       20 Monday   weekday
+    ## 6 2.0943396 2012-10-01       25 Monday   weekday
+
 2.Make a panel plot containing a time series plot (i.e. type = "l") of
 the 5-minute interval (x-axis) and the average number of steps taken,
 averaged across all weekday days or weekend fdays (y-axis). See the
 README file in the GitHub repository to see an example of what this plot
 should look like using simulated data.
 
+    fillNA$day<-as.factor(weekdays(fillNA$date))
+    fillNA$indicator<-ifelse(fillNA$day %in% c("Saturday","Sunday"), "weekend", "weekday")
+
     #the average number of steps taken for weekdays 
-    weekdaysfillNA <- fillNA[fillNA$indicator == weekday",]
+    weekdaysfillNA <- fillNA[fillNA$indicator == "weekday",]
     stepsperweekday <- aggregate(weekdaysfillNA$steps, list(weekdaysfillNA$interval), FUN=mean)
     stepsperweekday$indicator <- "weekday"
 
@@ -172,7 +194,7 @@ should look like using simulated data.
     library(lattice)
     xyplot(steps ~ interval  | indicator, data = newfillNA, layout = c(1,2), type ="l", ylab="Number of Steps")
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-10-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-9-1.png)
 
 Yes, there are differences in activity patterns between weekdays and
 weekends. As observed, weekend at most times exceeded the 100 steps mark
